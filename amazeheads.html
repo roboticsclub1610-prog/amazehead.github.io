@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Media Gallery – Modern Robot Theme</title>
+  <style>
+  /* CALM INTRO */
+#calm-intro {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0a0f1f, #000000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: 9999;
+    animation: fadeOut 2s ease-in-out 5s forwards;
+}
+
+/* Title Styling */
+.calm-title {
+    position: relative;
+    color: #e6f7ff;
+    font-family: "Poppins", sans-serif;
+    font-size: 2.8rem;
+    text-align: center;
+    z-index: 10;
+
+    /* smooth glow */
+    text-shadow: 
+        0 0 10px #7de4ff,
+        0 0 20px #83e1ff33;
+    
+    animation: fadeIn 2s ease-out;
+}
+
+.calm-title span {
+    font-size: 3.2rem;
+    font-weight: 600;
+    color: #7de4ff;
+}
+
+/* Fade In */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(20px);}
+    100% { opacity: 1; transform: translateY(0);}
+}
+
+/* Fade Out */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; visibility: hidden; }
+}
+
+/* Particle Canvas */
+#calm-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+    body { margin: 0; background: #f0f4f9; font-family: 'Arial', sans-serif; color: #333; }
+
+    /* Top Navigation */
+    nav { background: #1e3a8a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+    nav h1 { margin: 0; font-size: 1.8rem; }
+    .menu { position: relative; }
+    .menu button { background: #3b82f6; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+    .dropdown { display: none; position: absolute; right: 0; background: white; color: black; border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); width: 180px; }
+    .dropdown a { display: block; padding: 12px; text-decoration: none; color: #333; }
+    .dropdown a:hover { background: #e5e7eb; }
+
+    /* Section Layout */
+    .container { max-width: 1200px; margin: auto; padding: 30px; }
+
+    /* Gallery Cards */
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+    .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 6px 14px rgba(0,0,0,0.08); border: 2px solid #d1d5db; }
+    .card img, .card video { width: 100%; border-radius: 12px; }
+    .download { display: inline-block; margin-top: 12px; padding: 10px 14px; background: #2563eb; color: white; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+
+    /* Admin Panel */
+    #adminPanel { display: none; background: white; margin-top: 40px; border-radius: 18px; padding: 20px; box-shadow: 0 6px 14px rgba(0,0,0,0.1); }
+    #adminPanel input { margin: 12px 0; }
+
+    footer { margin-top: 50px; padding: 25px; background: #1e3a8a; text-align: center; color: white; border-top: 5px solid #3b82f6; }
+  </style>
+</head>
+<body>
+<body>
+    <!-- Minimal Calm Intro -->
+    <div id="calm-intro">
+        <h1 class="calm-title">Welcome to<br><span>AmazeHeads Robotics</span></h1>
+        <canvas id="calm-particles"></canvas>
+    </div>
+
+
+<!-- Navigation -->
+<nav>
+  <h1>🤖 WELCOME TO AMAZEHEADS</h1>
+  <div class="menu">
+    <button onclick="toggleDropdown()">Menu ▼</button>
+    <div class="dropdown" id="dropdownMenu">
+      <a href="#" onclick="showAdminPanel()">Admin Login</a>
+      <a href="#">About</a>
+      <a href="#">Help</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Gallery -->
+  <div class="gallery" id="gallery"></div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel">
+    <h2>Admin Upload Panel</h2>
+    <input type="file" id="mediaInput" multiple accept="image/*,video/*" />
+    <button onclick="uploadMedia()">Upload Files</button>
+    <p id="uploadMsg"></p>
+  </div>
+
+</div>
+
+<footer>
+  © 2025 AMAZEHEADS – ARTIFICIAL INTELLIGENCE AND ROBOTICS
+</footer>
+
+<script>
+  // Toggle menu
+  function toggleDropdown() {
+    const menu = document.getElementById('dropdownMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
+
+  // Admin login panel
+  function showAdminPanel() {
+    const pass = prompt('Enter admin password:');
+    if (pass === 'school123') {
+      document.getElementById('adminPanel').style.display = 'block';
+    } else {
+      alert('Incorrect password');
+    }
+  }
+
+  // Load gallery
+  let galleryItems = JSON.parse(localStorage.getItem('gallery')) || [];
+  function renderGallery() {
+    const container = document.getElementById('gallery');
+    container.innerHTML = '';
+
+    galleryItems.forEach((item) => {
+      const div = document.createElement('div');
+      div.className = 'card';
+
+      if (item.type.startsWith('image')) {
+        div.innerHTML = `<img src="${item.url}" /><br><a class="download" download href="${item.url}">Download</a>`;
+      } else {
+        div.innerHTML = `<video controls src="${item.url}"></video><br><a class="download" download href="${item.url}">Download</a>`;
+      }
+      container.appendChild(div);
+    });
+  }
+  renderGallery();
+
+  // Upload media
+  function uploadMedia() {
+    const input = document.getElementById('mediaInput');
+    const files = input.files;
+    if (!files.length) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        galleryItems.push({ type: file.type, url: e.target.result });
+        localStorage.setItem('gallery', JSON.stringify(galleryItems));
+        renderGallery();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('uploadMsg').innerText = 'Upload successful!';
+  }
+</script>
+<script>
+// Calm Soft Particles Background
+const canvas = document.getElementById("calm-particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+class SoftParticle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.r = Math.random() * 2 + 0.5;
+        this.dx = (Math.random() - 0.5) * 0.3;
+        this.dy = (Math.random() - 0.5) * 0.3;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+
+        ctx.fillStyle = "rgba(125, 228, 255, 0.2)";
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "#7de4ff55";
+
+        ctx.fill();
+    }
+
+    update() {
+        this.x += this.dx;
+        this.y += this.dy;
+
+        if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+
+        this.draw();
+    }
+}
+
+function initParticles() {
+    for (let i = 0; i < 80; i++) {
+        particles.push(new SoftParticle());
+    }
+}
+initParticles();
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => p.update());
+    requestAnimationFrame(animate);
+}
+animate();
+
+// Remove after intro
+setTimeout(() => {
+    document.getElementById("calm-intro").style.display = "none";
+}, 7000);
+</script>
+
+</body>
+</html>
